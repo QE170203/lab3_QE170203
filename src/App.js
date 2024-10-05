@@ -1,6 +1,6 @@
 import logo from './logo.svg';
 import './App.css';
-import { Container, Row, Navbar, Nav, NavDropdown, Form, Button, Carousel, CarouselImage, Col, Card, Modal, show, handleClose, handleShowe, Badge, ButtonGroup, ButtonToolbar, cardSize, increaseSize, decreaseSize } from "react-bootstrap";
+import { Container, Row, Navbar, Nav, NavDropdown, Form, Button, Carousel, CarouselImage, Col, Modal, ListGroup, Card } from "react-bootstrap";
 import img1 from './images/pizza1.jpg';
 import img2 from './images/pizza2.jpg';
 import img3 from './images/pizza3.jpg';
@@ -9,19 +9,13 @@ import menu2 from './images/menu2.jpg';
 import menu3 from './images/menu3.jpg';
 import menu4 from './images/menu4.jpg';
 import { useState } from 'react';
+import { useCart } from './component/useCart';
 function App() {
-  const [show, setShow] = useState(false);
+  const { cartItems, handleBuyClick, handleQuantityChange, totalItemsInCart } = useCart();
+  const [showCart, setShowCart] = useState(false);
 
-  const handleClose = () => setShow(false);
-  const handleShow = () => setShow(true);
-  const [cardSize, setCardSize] = useState(200); // Initial size is 200px
-
-  const increaseSize = () => {
-    setCardSize(prevSize => prevSize + 20); // Increase size by 20px
-  };
-
-  const decreaseSize = () => {
-    setCardSize(prevSize => (prevSize > 20 ? prevSize - 20 : prevSize)); // Decrease size by 20px but not below 20px
+  const handleCartToggle = () => {
+    setShowCart(!showCart);
   };
   return (
     <>
@@ -53,36 +47,66 @@ function App() {
                     Link
                   </Nav.Link>
                 </Nav>
-                <Button variant="primary" onClick={handleShow}>
-                  Item: <Badge bg="secondary">0</Badge>
+                <Nav>
+                  <Form className="d-flex">
+                    <Form.Control
+                      type="search"
+                      placeholder="Search"
+                      className="me-2"
+                      aria-label="Search"
+                    />
+                    <Button variant="outline-success">Search</Button>
+                  </Form>
+                </Nav>
+                <Form className="d-flex">
 
-                </Button>
-
-                <Modal show={show} onHide={handleClose}>
-                  <Modal.Header closeButton>
-                    <Modal.Title>Using Gird in Modal</Modal.Title>
-                  </Modal.Header>
-                  <div style={{ width: `${cardSize}px`, border: '1px solid black', padding: '10px', transition: 'width 0.3s ease' }}>
-                    <ButtonToolbar className="w-100">
-                      <div className="d-flex justify-content-between align-items-center w-100">
-                        <Modal.Body className="mb-0">Card Title 1 2</Modal.Body>
-                        <ButtonGroup>
-                          <Button className="mx-2" onClick={increaseSize} style={{ backgroundColor: 'red', color: 'white' }}>+</Button>
-                          <Button className="mx-2" onClick={decreaseSize} style={{ backgroundColor: 'blue', color: 'white' }}>-</Button>
-                        </ButtonGroup>
-                      </div>
-                    </ButtonToolbar>
-                  </div>
-
-                  <Modal.Body>Card Title 2  3</Modal.Body>
-                  <Modal.Body>Card Title 3  3</Modal.Body>
-                  <Modal.Footer>
-
-                    <Button variant="primary" onClick={handleClose}>
-                      Close
-                    </Button>
-                  </Modal.Footer>
-                </Modal>
+                  <Button variant="primary" onClick={handleCartToggle}>Item: {totalItemsInCart}
+                  </Button>
+                  <Modal show={showCart} onHide={handleCartToggle}>
+                    <Modal.Header closeButton>
+                      <Modal.Title>Using Grid in Modal</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                      {cartItems.length === 0 ? (
+                        <p>No item, please add some.</p>
+                      ) : (
+                        <ListGroup>
+                          {cartItems.map((item) => (
+                            <ListGroup.Item key={item.name}>
+                              <Row>
+                                <Col xs={3}>{item.name}</Col>
+                                <Col xs={3}>{item.quantity}</Col>
+                                <Col xs={3}>
+                                  <Button
+                                    variant="primary"
+                                    size="sm"
+                                    onClick={() => handleQuantityChange(item.name, 1)}
+                                  >
+                                    +
+                                  </Button>{' '}
+                                </Col>
+                                <Col xs={3}>
+                                  <Button
+                                    variant="danger"
+                                    size="sm"
+                                    onClick={() => handleQuantityChange(item.name, -1)}
+                                  >
+                                    -
+                                  </Button>
+                                </Col>
+                              </Row>
+                            </ListGroup.Item>
+                          ))}
+                        </ListGroup>
+                      )}
+                    </Modal.Body>
+                    <Modal.Footer>
+                      <Button variant="primary" onClick={handleCartToggle}>
+                        Close
+                      </Button>
+                    </Modal.Footer>
+                  </Modal>
+                </Form>
               </Navbar.Collapse>
             </Container>
           </Navbar>
@@ -121,12 +145,12 @@ function App() {
               <Card style={{ width: '18rem' }}>
                 <Card.Img variant="top" src={menu1} />
                 <Card.Body>
-                  <Card.Title>Card 1</Card.Title>
+                  <Card.Title>Card Title</Card.Title>
                   <Card.Text>
                     Some quick example text to build on the card title and make up the
                     bulk of the card's content.
                   </Card.Text>
-                  <Button variant="primary">Go somewhere</Button>
+                  <Button onClick={() => handleBuyClick('Card title 1')} variant="primary">Buy</Button>
                 </Card.Body>
               </Card>
             </Col>
@@ -134,12 +158,12 @@ function App() {
               <Card style={{ width: '18rem' }}>
                 <Card.Img variant="top" src={menu2} />
                 <Card.Body>
-                  <Card.Title>Card 2</Card.Title>
+                  <Card.Title>Card Title</Card.Title>
                   <Card.Text>
                     Some quick example text to build on the card title and make up the
                     bulk of the card's content.
                   </Card.Text>
-                  <Button variant="primary">Go somewhere</Button>
+                  <Button onClick={() => handleBuyClick('Card title 2')} variant="primary">Buy</Button>
                 </Card.Body>
               </Card>
             </Col>
@@ -147,12 +171,12 @@ function App() {
               <Card style={{ width: '18rem' }}>
                 <Card.Img variant="top" src={menu3} />
                 <Card.Body>
-                  <Card.Title>Card 3</Card.Title>
+                  <Card.Title>Card Title</Card.Title>
                   <Card.Text>
                     Some quick example text to build on the card title and make up the
                     bulk of the card's content.
                   </Card.Text>
-                  <Button variant="primary">Go somewhere</Button>
+                  <Button onClick={() => handleBuyClick('Card title 3')} variant="primary">Buy</Button>
                 </Card.Body>
               </Card>
             </Col>
@@ -160,12 +184,12 @@ function App() {
               <Card style={{ width: '18rem' }}>
                 <Card.Img variant="top" src={menu4} />
                 <Card.Body>
-                  <Card.Title>Card 4</Card.Title>
+                  <Card.Title>Card Title </Card.Title>
                   <Card.Text>
                     Some quick example text to build on the card title and make up the
                     bulk of the card's content.
                   </Card.Text>
-                  <Button variant="primary">Go somewhere</Button>
+                  <Button onClick={() => handleBuyClick('Card title 4')} variant="primary">Buy</Button>
                 </Card.Body>
               </Card>
             </Col>
